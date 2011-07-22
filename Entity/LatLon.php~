@@ -1,0 +1,6 @@
+<?php
+namespace Kitpages\GoogleMapsBundle\Entity;
+
+class LatLon
+{
+}

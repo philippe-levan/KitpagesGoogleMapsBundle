@@ -1,0 +1,7 @@
+kitpages_google_maps_home:
+    pattern:  /
+    defaults: { _controller: KitpagesGoogleMapsBundle:Default:index }
+
+kitpages_google_maps_ajax_markers:
+    pattern:  "/ajax-marker"
+    defaults: { _controller: KitpagesGoogleMapsBundle:Default:ajaxMarkerList }

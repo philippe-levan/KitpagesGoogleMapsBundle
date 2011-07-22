@@ -1,0 +1,160 @@
+{% autoescape false %}
+<script src="http://maps.google.com/maps/api/js?sensor=false&region=FR&language=fr"></script>
+{% block initMapHtml %}
+<div class="kit-gmap-container">
+    <div
+        id="kit-gmap-canvas-{{mapName}}"
+        style="width:{{map.width}}px;height:{{map.height}}px;"
+    >
+    </div>
+</div>
+{% endblock initMapHtml %}
+
+
+<script>
+(function() {
+
+{% block initMapData %}
+    var map = new google.maps.Map(
+        document.getElementById("kit-gmap-canvas-{{mapName}}"),
+        {
+            zoom: {{map.zoom}},
+            center: new google.maps.LatLng({{map.center.lat}}, {{map.center.lng}}),
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+    );
+    var oldZoom = {{map.zoom}};
+{% endblock initMapData%}
+
+{% block mapMethods %}
+    var getZoomRange = function(zoom) {
+        if (zoom < 10) {
+            return "A";
+        }
+        if (zoom < 13 ) {
+            return "B";
+        }
+        if (zoom < 15 ) {
+            return "C";
+        }
+        return "D";
+    }
+{% endblock mapMethods %}
+
+
+    var markerList = {};
+
+{% block addMarkerMethod %}
+    /**
+     * @param hash markerData
+markerData = {
+    position: {lat:12.5, lng:152.5},
+    title: "marker",
+    data: {}
+}
+     */
+    var addMarker = function(markerData, layer) {
+        var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(markerData.position.lat, markerData.position.lng),
+            map: null,
+            title: markerData.title
+        });
+        markerData.object = marker;
+        markerList[layer].push(markerData);
+    }
+{% endblock addMarkerMethod %}
+    
+{% block markerMethods %}
+    var addMarkerList = function(markerDataList, layer) {
+        for (i in markerDataList) {
+            addMarker(markerDataList[i], layer);
+        }
+    }
+    
+    var hideMarkerList = function(layer) {
+        for (i in markerList[layer]) {
+            markerList[layer][i]["object"].setMap(null);
+        }
+    }
+    var showMarkerList = function(layer) {
+        for (i in markerList[layer]) {
+            var markerData = markerList[layer][i];
+            var marker = markerData["object"];
+            marker.setMap(map);
+        }
+    }
+    var clearMarkerList = function(layer) {
+        hideMarkerList(layer);
+        markerList[layer].length = 0;
+    }
+
+{% endblock markerMethods%}
+    
+{% block initMarkerData %}
+    if (!markerList.{{map.layer}}) {
+        markerList.{{map.layer}} = [];
+    }
+
+    {% for marker in map.markerList %}
+        addMarker(
+            {
+                position: { lat:{{marker.position.lat}},lng:{{marker.position.lng}} },
+                title: "{{marker.title | escape('js') }}",
+                data: {{marker.data | json_encode}}
+            },
+            "{{map.layer}}"
+        );
+    {% endfor %}
+    showMarkerList("{{map.layer}}");
+{% endblock initMarkerData%}
+
+{% block mapEvents %}
+    var refreshZoomTimeout = null;
+    google.maps.event.addListener(map, 'zoom_changed', function() {
+        clearTimeout(refreshZoomTimeout);
+        refreshZoomTimeout = setTimeout(function() {
+            if (getZoomRange(map.getZoom()) == getZoomRange(oldZoom) ) {
+                return;
+            }
+            refreshCallback();
+        }, 500);
+    });
+    var refreshMoveTimeout = null;
+    google.maps.event.addListener(map, 'center_changed', function() {
+        clearTimeout(refreshMoveTimeout);
+        refreshMoveTimeout = setTimeout(function() {
+            refreshCallback();
+        }, 500);
+    });
+    var refreshCallback = function() {
+        oldZoom = map.getZoom();
+        $.ajax({
+            type: "POST",
+            url: "{{ map.data.updateMarkerUrl }}",
+            dataType: 'json',
+            data: "zoom="+map.getZoom()+
+                '&lat='+map.getCenter().lat()+
+                '&lng='+map.getCenter().lng()+
+                '&width='+{{map.width}}+
+                '&height='+{{map.height}}+
+                '&swLat='+map.getBounds().getSouthWest().lat()+
+                '&swLng='+map.getBounds().getSouthWest().lng()+
+                '&neLat='+map.getBounds().getNorthEast().lat()+
+                '&neLng='+map.getBounds().getNorthEast().lng(),
+            success: function(data) {
+                var responseMarkerList = data.map.markerList;
+                var layer = data.map.layer;
+                if (!markerList[layer]) {
+                    markerList[layer] = [];
+                }
+                clearMarkerList(layer);
+                addMarkerList(responseMarkerList, layer);
+                showMarkerList(layer);
+            }
+        });
+
+    }
+{% endblock mapEvents %}
+})();
+</script>
+{% endautoescape %}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="Kitpages\GoogleMapsBundle\Entity\Map" table="kit_google_maps_map">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO" />
+        </id>
+        
+        <field name="layer" column="layer" type="string" nullable="true" length="100"/>
+        
+        <field name="width" column="width" type="integer" />
+        <field name="height" column="height" type="integer" />
+        
+        <field name="data" column="data" type="array" nullable="true" />
+        
+        <field name="zoom" column="zoom" type="integer" />
+        
+        <one-to-one field="center" target-entity="Kitpages\GoogleMapsBundle\Entity\LatLng">
+            <join-column name="center_id" referenced-column-name="id" on-update="CASCADE" on-delete="CASCADE"/>
+        </one-to-one>
+        
+        <one-to-many field="markerList" target-entity="Kitpages\GoogleMapsBundle\Entity\Marker" mapped-by="map" />
+
+    </entity>
+
+</doctrine-mapping>

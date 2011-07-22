@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="Kitpages\GoogleMapsBundle\Entity\Marker" table="kit_google_maps_marker">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO" />
+        </id>
+        
+        <field name="title" column="title" type="string" nullable="true" length="250"/>
+        
+        <field name="data" column="data" type="array" nullable="true"/>
+        
+        <one-to-one field="position" target-entity="Kitpages\GoogleMapsBundle\Entity\LatLng">
+            <join-column name="position_id" referenced-column-name="id" on-update="CASCADE" on-delete="CASCADE"/>
+        </one-to-one>
+        
+        <many-to-one field="map" target-entity="Kitpages\GoogleMapsBundle\Entity\Map" inversed-by="markerList">
+            <join-column name="rental_id" referenced-column-name="id" on-delete="CASCADE" on-update="CASCADE"/>
+        </many-to-one>
+    </entity>
+
+</doctrine-mapping>

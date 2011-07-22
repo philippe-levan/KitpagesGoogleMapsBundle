@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="Kitpages\GoogleMapsBundle\Entity\LatLngBound" table="kit_google_maps_latlngbound">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO" />
+        </id>
+        
+        <one-to-one field="sw" target-entity="Kitpages\GoogleMapsBundle\Entity\LatLng">
+            <join-column name="sw_id" referenced-column-name="id" on-update="CASCADE" on-delete="CASCADE"/>
+        </one-to-one>
+        <one-to-one field="ne" target-entity="Kitpages\GoogleMapsBundle\Entity\LatLng">
+            <join-column name="ne_id" referenced-column-name="id" on-update="CASCADE" on-delete="CASCADE"/>
+        </one-to-one>
+    </entity>
+
+</doctrine-mapping>
