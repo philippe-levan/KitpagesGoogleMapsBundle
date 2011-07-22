@@ -1,6 +1,0 @@
-<?php
-namespace Kitpages\GoogleMapsBundle\Entity;
-
-class LatLonBound
-{
-}
