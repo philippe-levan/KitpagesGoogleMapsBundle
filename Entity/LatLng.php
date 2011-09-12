@@ -1,13 +1,10 @@
 <?php
+
 namespace Kitpages\GoogleMapsBundle\Entity;
+
 
 class LatLng
 {
-    public function __construct($lat = null, $lng = null)
-    {
-        $this->lat = $lat;
-        $this->lng = $lng;
-    }
     /**
      * @var float $lat
      */
@@ -23,6 +20,18 @@ class LatLng
      */
     private $id;
 
+
+    /**
+     * Constructor
+     *
+     * @param float $lat
+     * @param float $lng
+     */
+    public function __construct($lat = null, $lng = null)
+    {
+        $this->lat = $lat;
+        $this->lng = $lng;
+    }
 
     /**
      * Set lat
@@ -73,7 +82,12 @@ class LatLng
     {
         return $this->id;
     }
-    
+
+    /**
+     * Serializes the coordinates to an array
+     *
+     * @return array
+     */
     public function toArray()
     {
         return array(
