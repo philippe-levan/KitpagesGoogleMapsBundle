@@ -1,31 +1,37 @@
 <?php
+
 namespace Kitpages\GoogleMapsBundle\Entity;
 
-use Kitpages\GoogleMapsBundle\Entity\LatLng;
 
 class LatLngBound
 {
-    public function __construct(LatLng $sw, LatLng $ne)
-    {
-        $this->sw = $sw;
-        $this->ne = $ne;
-    }
-
     /**
      * @var integer $id
      */
     private $id;
 
     /**
-     * @var Kitpages\GoogleMapsBundle\Entity\LatLng
+     * @var LatLng
      */
     private $sw;
 
     /**
-     * @var Kitpages\GoogleMapsBundle\Entity\LatLng
+     * @var LatLng
      */
     private $ne;
 
+
+    /**
+     * Constructor
+     *
+     * @param LatLng $sw
+     * @param LatLng $ne
+     */
+    public function __construct(LatLng $sw, LatLng $ne)
+    {
+        $this->sw = $sw;
+        $this->ne = $ne;
+    }
 
     /**
      * Get id
@@ -40,9 +46,9 @@ class LatLngBound
     /**
      * Set sw
      *
-     * @param Kitpages\GoogleMapsBundle\Entity\LatLng $sw
+     * @param LatLng $sw
      */
-    public function setSw(\Kitpages\GoogleMapsBundle\Entity\LatLng $sw)
+    public function setSw(LatLng $sw)
     {
         $this->sw = $sw;
     }
@@ -50,7 +56,7 @@ class LatLngBound
     /**
      * Get sw
      *
-     * @return Kitpages\GoogleMapsBundle\Entity\LatLng 
+     * @return LatLng
      */
     public function getSw()
     {
@@ -60,9 +66,9 @@ class LatLngBound
     /**
      * Set ne
      *
-     * @param Kitpages\GoogleMapsBundle\Entity\LatLng $ne
+     * @param LatLng $ne
      */
-    public function setNe(\Kitpages\GoogleMapsBundle\Entity\LatLng $ne)
+    public function setNe(LatLng $ne)
     {
         $this->ne = $ne;
     }
@@ -70,7 +76,7 @@ class LatLngBound
     /**
      * Get ne
      *
-     * @return Kitpages\GoogleMapsBundle\Entity\LatLng 
+     * @return LatLng
      */
     public function getNe()
     {

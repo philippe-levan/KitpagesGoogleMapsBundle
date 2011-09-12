@@ -1,19 +1,10 @@
 <?php
+
 namespace Kitpages\GoogleMapsBundle\Entity;
 
-use Kitpages\GoogleMapsBundle\Entity\LatLng;
 
 class Map
 {
-    public function __construct($width = 600, $height= 400, LatLng $center = null, $zoom = null)
-    {
-        $this->markerList = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->width = $width;
-        $this->height = $height;
-        $this->center = $center;
-        $this->zoom = $zoom;
-    }
-
     /**
      * @var integer $width
      */
@@ -40,14 +31,29 @@ class Map
     private $id;
 
     /**
-     * @var Kitpages\GoogleMapsBundle\Entity\LatLng
+     * @var LatLng
      */
     private $center;
 
     /**
-     * @var Kitpages\GoogleMapsBundle\Entity\Marker
+     * @var Marker
      */
     private $markerList;
+
+    /**
+     * @var string $layer
+     */
+    private $layer;
+    
+
+    public function __construct($width = 600, $height= 400, LatLng $center = null, $zoom = null)
+    {
+        $this->markerList = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->width = $width;
+        $this->height = $height;
+        $this->center = $center;
+        $this->zoom = $zoom;
+    }
     
     /**
      * Set width
@@ -89,15 +95,31 @@ class Map
         return $this->height;
     }
 
+    /**
+     * Set parameter $key with $val
+     *
+     * @param string $key
+     * @param mixed $val
+     * @return void
+     */
     public function setParameter($key, $val)
     {
         $this->data[$key] = $val;
     }
+
+
+    /**
+     * Get parameter with key $key
+     *
+     * @param string $key
+     * @return mixed
+     */
     public function getParameter($key)
     {
         if (! array_key_exists($key, $this->data) ) {
             return null;
         }
+        
         return $this->data[$key];
     }
 
@@ -154,9 +176,9 @@ class Map
     /**
      * Set center
      *
-     * @param Kitpages\GoogleMapsBundle\Entity\LatLng $center
+     * @param LatLng $center
      */
-    public function setCenter(\Kitpages\GoogleMapsBundle\Entity\LatLng $center)
+    public function setCenter(LatLng $center)
     {
         $this->center = $center;
     }
@@ -164,7 +186,7 @@ class Map
     /**
      * Get center
      *
-     * @return Kitpages\GoogleMapsBundle\Entity\LatLng 
+     * @return LatLng
      */
     public function getCenter()
     {
@@ -174,9 +196,9 @@ class Map
     /**
      * Add markerList
      *
-     * @param Kitpages\GoogleMapsBundle\Entity\Marker $markerList
+     * @param Marker $markerList
      */
-    public function addMarker(\Kitpages\GoogleMapsBundle\Entity\Marker $markerList)
+    public function addMarker(Marker $markerList)
     {
         $this->markerList[] = $markerList;
     }
@@ -184,23 +206,30 @@ class Map
     /**
      * Get markerList
      *
-     * @return Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getMarkerList()
     {
         return $this->markerList;
     }
-    
+
+    /**
+     * Serializes the map to an array
+     *
+     * @return array
+     */
     public function toArray()
     {
         $encodedMarkerList = array();
         foreach ($this->getMarkerList() as $marker) {
             $encodedMarkerList[] = $marker->toArray();
         }
+
         $center = null;
         if ($this->getCenter() instanceof LatLng) {
             $center = $this->getCenter()->toArray();
         }
+
         $tab = array(
             "width" => $this->getWidth(),
             "height" => $this->getHeight(),
@@ -211,13 +240,9 @@ class Map
             "layer" => $this->getLayer(),
             "markerList" => $encodedMarkerList
         );
+        
         return $tab;
     }
-    /**
-     * @var string $layer
-     */
-    private $layer;
-
 
     /**
      * Set layer
