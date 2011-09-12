@@ -91,9 +91,14 @@ markerData = {
 {% endblock markerMethods%}
     
 {% block initMarkerData %}
+
     if (!markerList.{{map.layer}}) {
         markerList.{{map.layer}} = [];
     }
+
+    {% if map.data.fitBounds|default(false) %}
+        var bounds = new google.maps.LatLngBounds();
+    {% endif %}
 
     {% for marker in map.markerList %}
         addMarker(
@@ -104,8 +109,20 @@ markerData = {
             },
             "{{map.layer}}"
         );
+
+        {% if map.data.fitBounds|default(false) %}
+            var ll = new google.maps.LatLng({{marker.position.lat}}, {{marker.position.lng}});
+            bounds.extend(ll);
+        {% endif %}
+
     {% endfor %}
+
     showMarkerList("{{map.layer}}");
+
+    {% if map.data.fitBounds|default(false) %}
+        map.fitBounds(bounds);
+    {% endif %}
+
 {% endblock initMarkerData%}
 
 {% block mapEvents %}
