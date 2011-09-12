@@ -1,16 +1,10 @@
 <?php
+
 namespace Kitpages\GoogleMapsBundle\Entity;
 
-use Kitpages\GoogleMapsBundle\Entity\LatLng;
 
 class Marker
 {
-    public function __construct(LatLng $position, $title="marker")
-    {
-        $this->position = $position;
-        $this->title = $title;
-    }
-
     /**
      * @var string $title
      */
@@ -27,15 +21,27 @@ class Marker
     private $id;
 
     /**
-     * @var Kitpages\GoogleMapsBundle\Entity\LatLng
+     * @var LatLng
      */
     private $position;
 
     /**
-     * @var Kitpages\GoogleMapsBundle\Entity\Map
+     * @var Map
      */
     private $map;
 
+    
+    /**
+     * Constructor
+     *
+     * @param LatLng $position
+     * @param string $title
+     */
+    public function __construct(LatLng $position, $title = 'marker')
+    {
+        $this->position = $position;
+        $this->title = $title;
+    }
 
     /**
      * Set title
@@ -57,17 +63,33 @@ class Marker
         return $this->title;
     }
 
+    /**
+     * Set parameter $key with $val
+     *
+     * @param string $key
+     * @param mixed $val
+     * @return void
+     */
     public function setParameter($key, $val)
     {
         $this->data[$key] = $val;
     }
+
+    /**
+     * Get parameter with key $key
+     *
+     * @param string $key
+     * @return mixed
+     */
     public function getParameter($key)
     {
         if (! array_key_exists($key, $this->data) ) {
             return null;
         }
+        
         return $this->data[$key];
     }
+
     /**
      * Set data
      *
@@ -101,9 +123,9 @@ class Marker
     /**
      * Set position
      *
-     * @param Kitpages\GoogleMapsBundle\Entity\LatLng $position
+     * @param LatLng $position
      */
-    public function setPosition(\Kitpages\GoogleMapsBundle\Entity\LatLng $position)
+    public function setPosition(LatLng $position)
     {
         $this->position = $position;
     }
@@ -111,7 +133,7 @@ class Marker
     /**
      * Get position
      *
-     * @return Kitpages\GoogleMapsBundle\Entity\LatLng 
+     * @return LatLng
      */
     public function getPosition()
     {
@@ -121,9 +143,9 @@ class Marker
     /**
      * Set map
      *
-     * @param Kitpages\GoogleMapsBundle\Entity\Map $map
+     * @param Map $map
      */
-    public function setMap(\Kitpages\GoogleMapsBundle\Entity\Map $map)
+    public function setMap(Map $map)
     {
         $this->map = $map;
     }
@@ -131,13 +153,18 @@ class Marker
     /**
      * Get map
      *
-     * @return Kitpages\GoogleMapsBundle\Entity\Map 
+     * @return Map
      */
     public function getMap()
     {
         return $this->map;
     }
-    
+
+    /**
+     * Serializes Marker to an array
+     *
+     * @return array
+     */
     public function toArray()
     {
         return array(

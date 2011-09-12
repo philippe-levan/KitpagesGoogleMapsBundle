@@ -1,19 +1,10 @@
 <?php
+
 namespace Kitpages\GoogleMapsBundle\Entity;
 
-use Kitpages\GoogleMapsBundle\Entity\LatLng;
 
 class Map
 {
-    public function __construct($width = 600, $height= 400, LatLng $center = null, $zoom = null)
-    {
-        $this->markerList = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->width = $width;
-        $this->height = $height;
-        $this->center = $center;
-        $this->zoom = $zoom;
-    }
-
     /**
      * @var integer $width
      */
@@ -40,14 +31,29 @@ class Map
     private $id;
 
     /**
-     * @var Kitpages\GoogleMapsBundle\Entity\LatLng
+     * @var LatLng
      */
     private $center;
 
     /**
-     * @var Kitpages\GoogleMapsBundle\Entity\Marker
+     * @var Marker
      */
     private $markerList;
+
+    /**
+     * @var string $layer
+     */
+    private $layer;
+           
+
+    public function __construct($width = 600, $height= 400, LatLng $center = null, $zoom = null)
+    {
+        $this->markerList = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->width = $width;
+        $this->height = $height;
+        $this->center = $center;
+        $this->zoom = $zoom;
+    }
     
     /**
      * Set width
@@ -89,15 +95,31 @@ class Map
         return $this->height;
     }
 
+    /**
+     * Set parameter $key with $val
+     *
+     * @param string $key
+     * @param mixed $val
+     * @return void
+     */
     public function setParameter($key, $val)
     {
         $this->data[$key] = $val;
     }
+
+
+    /**
+     * Get parameter with key $key
+     *
+     * @param string $key
+     * @return mixed
+     */
     public function getParameter($key)
     {
         if (! array_key_exists($key, $this->data) ) {
             return null;
         }
+        
         return $this->data[$key];
     }
 
@@ -154,9 +176,9 @@ class Map
     /**
      * Set center
      *
-     * @param Kitpages\GoogleMapsBundle\Entity\LatLng $center
+     * @param LatLng $center
      */
-    public function setCenter(\Kitpages\GoogleMapsBundle\Entity\LatLng $center)
+    public function setCenter(LatLng $center)
     {
         $this->center = $center;
     }
@@ -164,7 +186,7 @@ class Map
     /**
      * Get center
      *
-     * @return Kitpages\GoogleMapsBundle\Entity\LatLng 
+     * @return LatLng
      */
     public function getCenter()
     {
@@ -174,9 +196,9 @@ class Map
     /**
      * Add markerList
      *
-     * @param Kitpages\GoogleMapsBundle\Entity\Marker $markerList
+     * @param Marker $markerList
      */
-    public function addMarker(\Kitpages\GoogleMapsBundle\Entity\Marker $markerList)
+    public function addMarker(Marker $markerList)
     {
         $this->markerList[] = $markerList;
     }
@@ -184,23 +206,30 @@ class Map
     /**
      * Get markerList
      *
-     * @return Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getMarkerList()
     {
         return $this->markerList;
     }
-    
+
+    /**
+     * Serializes the map to an array
+     *
+     * @return array
+     */
     public function toArray()
     {
         $encodedMarkerList = array();
         foreach ($this->getMarkerList() as $marker) {
             $encodedMarkerList[] = $marker->toArray();
         }
+
         $center = null;
         if ($this->getCenter() instanceof LatLng) {
             $center = $this->getCenter()->toArray();
         }
+
         $tab = array(
             "width" => $this->getWidth(),
             "height" => $this->getHeight(),
@@ -211,13 +240,9 @@ class Map
             "layer" => $this->getLayer(),
             "markerList" => $encodedMarkerList
         );
+        
         return $tab;
     }
-    /**
-     * @var string $layer
-     */
-    private $layer;
-
 
     /**
      * Set layer
@@ -237,5 +262,98 @@ class Map
     public function getLayer()
     {
         return $this->layer;
+    }
+
+    /**
+     * @return LatLngBound
+     */
+    public function getLatLngBoundsLimit() {
+        // init bounds
+        $bounds = new LatLngBound(new LatLng(), new LatLng());
+        $center = $this->getCenter();
+
+        // calculate left and right
+        $halfWidth = (int)($this->getWidth() / 2) + 1;
+        $delta = ( $halfWidth * 2^(21 - $this->getZoom()) ) ;
+        $bounds->getSw()->setLng($this->adjustLngByPixels($center->getLng(), -$delta, $this->getZoom()));
+        $bounds->getNe()->setLng($this->adjustLngByPixels($center->getLng(), $delta, $this->getZoom()));
+
+        // calculate top and bottom
+        $halfHeight = (int)($this->getHeight() / 2) + 1;
+        $delta = $halfHeight * 2^(21 - $this->getZoom());
+        $bounds->getNe()->setLat($this->adjustLatByPixels($center->getLat(), -$delta, $this->getZoom()));
+        $bounds->getSw()->setLat($this->adjustLatByPixels($center->getLat(), $delta, $this->getZoom()));
+
+        return $bounds;
+    }
+
+    /**
+     * @param float   $lng
+     * @param float   $delta
+     * @param integer $zoom
+     * @return float
+     */
+    protected function adjustLngByPixels($lng, $delta, $zoom)
+    {
+        return $this->xToLng($this->lngToX($lng) + ($delta << (21 - $zoom)));
+    }
+
+    /**
+     * @param float   $lat
+     * @param float   $delta
+     * @param integer $zoom
+     * @return float
+     */
+    protected function adjustLatByPixels($lat, $delta, $zoom)
+    {
+        return $this->yToLat($this->latToY($lat) + ($delta << (21 - $zoom)));
+    }
+
+    /**
+     * @param float $lng
+     * @return float
+     */
+    protected function lngToX($lng)
+    {
+        $offset = 268435456;
+        $radius = $offset / pi();
+
+        return round($offset + $radius * $lng * pi() / 180);
+    }
+
+    /**
+     * @param float $lat
+     * @return float
+     */
+    protected function latToY($lat)
+    {
+        $offset = 268435456;
+        $radius = $offset / pi();
+
+        return round($offset - $radius * log((1 + sin($lat * pi() / 180)) / (1 - sin($lat * pi() / 180))) / 2);
+    }
+
+    /**
+     * @param float $x
+     * @return float
+     */
+    protected function xToLng($x)
+    {
+        $offset = 268435456;
+        $radius = $offset / pi();
+
+        return ((round($x) - $offset) / $radius) * 180/ pi();
+    }
+
+    /**
+     * @param float $y
+     * @return float
+     */
+    protected function yToLat($y)
+    {
+        $offset = 268435456;
+        $radius = $offset / pi();
+
+        return (pi() / 2 - 2 * atan(exp((round($y) - $offset) / $radius))) * 180 / pi();
     }
 }
