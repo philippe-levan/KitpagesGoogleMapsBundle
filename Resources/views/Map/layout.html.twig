@@ -126,51 +126,68 @@ markerData = {
 {% endblock initMarkerData%}
 
 {% block mapEvents %}
-    var refreshZoomTimeout = null;
-    google.maps.event.addListener(map, 'zoom_changed', function() {
-        clearTimeout(refreshZoomTimeout);
-        refreshZoomTimeout = setTimeout(function() {
-            if (getZoomRange(map.getZoom()) == getZoomRange(oldZoom) ) {
-                return;
-            }
-            refreshCallback();
-        }, 500);
-    });
-    var refreshMoveTimeout = null;
-    google.maps.event.addListener(map, 'center_changed', function() {
-        clearTimeout(refreshMoveTimeout);
-        refreshMoveTimeout = setTimeout(function() {
-            refreshCallback();
-        }, 500);
-    });
-    var refreshCallback = function() {
-        oldZoom = map.getZoom();
-        $.ajax({
-            type: "POST",
-            url: "{{ map.data.updateMarkerUrl }}",
-            dataType: 'json',
-            data: "zoom="+map.getZoom()+
-                '&lat='+map.getCenter().lat()+
-                '&lng='+map.getCenter().lng()+
-                '&width='+{{map.width}}+
-                '&height='+{{map.height}}+
-                '&swLat='+map.getBounds().getSouthWest().lat()+
-                '&swLng='+map.getBounds().getSouthWest().lng()+
-                '&neLat='+map.getBounds().getNorthEast().lat()+
-                '&neLng='+map.getBounds().getNorthEast().lng(),
-            success: function(data) {
-                var responseMarkerList = data.map.markerList;
-                var layer = data.map.layer;
-                if (!markerList[layer]) {
-                    markerList[layer] = [];
+
+    {% if map.data.refreshMarkersUrl is defined %}
+
+        var refreshZoomTimeout = null;
+
+        google.maps.event.addListener(map, 'zoom_changed', function() {
+            clearTimeout(refreshZoomTimeout);
+            refreshZoomTimeout = setTimeout(function() {
+                if (getZoomRange(map.getZoom()) == getZoomRange(oldZoom) ) {
+                    return;
                 }
-                clearMarkerList(layer);
-                addMarkerList(responseMarkerList, layer);
-                showMarkerList(layer);
-            }
+                refreshCallback();
+            }, 500);
         });
 
-    }
+        var refreshMoveTimeout = null;
+        google.maps.event.addListener(map, 'center_changed', function() {
+            clearTimeout(refreshMoveTimeout);
+            refreshMoveTimeout = setTimeout(function() {
+                refreshCallback();
+            }, 500);
+        });
+
+        var refreshCallback = function() {
+            oldZoom = map.getZoom();
+            $.ajax({
+                type: "POST",
+                url: "{{ map.data.refreshMarkersUrl }}",
+                dataType: 'json',
+                data: "zoom="+map.getZoom()+
+                    '&lat='+map.getCenter().lat()+
+                    '&lng='+map.getCenter().lng()+
+                    '&width='+{{map.width}}+
+                    '&height='+{{map.height}}+
+                    '&swLat='+map.getBounds().getSouthWest().lat()+
+                    '&swLng='+map.getBounds().getSouthWest().lng()+
+                    '&neLat='+map.getBounds().getNorthEast().lat()+
+                    '&neLng='+map.getBounds().getNorthEast().lng(),
+                success: function(data) {
+                    var responseMarkerList = data.map.markerList;
+                    var layer = data.map.layer;
+                    if (!markerList[layer]) {
+                        markerList[layer] = [];
+                    }
+                    clearMarkerList(layer);
+                    addMarkerList(responseMarkerList, layer);
+                    showMarkerList(layer);
+                }
+            });
+        }
+
+        {% if map.data.autoRefreshMarkers|default(false) %}
+
+            var refreshListener = google.maps.event.addDomListener(window, 'load', function() {
+                refreshCallback();
+                google.maps.event.removeListener(refreshListener);
+            });
+
+        {% endif %}
+
+    {% endif %}
+    
 {% endblock mapEvents %}
 })();
 </script>
