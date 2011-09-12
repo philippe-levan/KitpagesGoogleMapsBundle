@@ -30,6 +30,18 @@ class Marker
      */
     private $map;
 
+    
+    /**
+     * Constructor
+     *
+     * @param LatLng $position
+     * @param string $title
+     */
+    public function __construct(LatLng $position, $title = 'marker')
+    {
+        $this->position = $position;
+        $this->title = $title;
+    }
 
     /**
      * Set title
