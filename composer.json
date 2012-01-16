@@ -1,0 +1,23 @@
+{
+    "name": "kitpages/google-maps-bundle",
+    "description": "Bundle used to display a google map on a website with ajax refreshing.",
+    "keywords": ["map","google","google-maps"],
+    "homepage": "http://github.com/kitpages/KitpagesGoogleMapsBundle",
+    "type": "symfony-bundle",
+    "license": "BSD",
+    "authors": [
+        {
+            "name": "Philippe Levan",
+            "email": "philippe.levan@kitpages.fr",
+            "homepage": "http://www.kitpages.fr"
+        }
+    ],
+    "require": {
+        "symfony/framework-bundle": "2.0.*",
+        "doctrine/common": ">=2.0"
+    },
+    "autoload": {
+        "psr-0": { "Kitpages\\GoogleMapsBundle": "" }
+    },
+    "target-dir": "Kitpages/GoogleMapsBundle"
+}
